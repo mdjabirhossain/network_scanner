@@ -1,4 +1,15 @@
 import scapy.all as scapy
+import optparse
+
+
+def get_args():
+    parser = optparse.OptionParser()
+    parser.add_option("-t", "--target", dest="target", help="Target IP range to scan")
+    values, args = parser.parse_args()
+    if not values.target:
+        parser.error("[-] Please enter a target, use --help for more info.")
+    return values.target
+
 
 def scan(ip):
     #scapy.arping(ip)
@@ -14,6 +25,9 @@ def scan(ip):
     # and looks for the one that has the ip of the arp_request packet,
     # we configured to search every MAC address by setting up the Ether dst to ff:ff:ff:ff:ff:ff
     answered_list = scapy.srp(arp_request_broadcast, timeout=1, verbose=False)[0]
+    return answered_list
+
+def print_result(answered_list):
     print("IP" + "\t\t\t" + "MAC Address" + "\n-----------------------------------------")
     for answer in answered_list:
         # ip address of the client that responded to the arp request
@@ -21,7 +35,9 @@ def scan(ip):
         print(answer[1].psrc + "\t\t" + answer[1].hwsrc)
 
 def main():
-    scan("192.168.173.2/24")
+    target = get_args()
+    answered_list = scan(target)
+    print_result(answered_list)
 
 
 # Press the green button in the gutter to run the script.
